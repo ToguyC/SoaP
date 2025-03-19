@@ -189,8 +189,13 @@ def colorize_tensor(value, vmin=None, vmax=None, cmap=None, colorbar=False, heig
     fig.canvas.draw()
 
     # Convert the figure to numpy array, read the pixel values and reshape the array
-    img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    argb_data = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
+    
+    width, height = fig.canvas.get_width_height()
+    argb_data = argb_data.reshape((height, width, 4))
+    rgb_data = argb_data[:, :, 1:]
+    
+    img = rgb_data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
 
     # Normalize into 0-1 range for TensorBoard(X). Swap axes for newer versions where API expects colors in first dim
     img = img / 255.0
